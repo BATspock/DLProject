@@ -8,7 +8,7 @@ import itertools
 
 text_prompt = "dog cat"
 
-def detect_object(class_label, outputs, width, height):
+def detect_object(class_label, outputs, width, height, classes):
     
     # Get the bounding boxes, confidences, and class IDs
     boxes = []
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     # Run inference through the model
     outputs = model.forward(output_layers)
 
-    bool_present, bounding_box = detect_object(class_label, outputs, width, height)
+    bool_present, bounding_box = detect_object(class_label, outputs, width, height, classes)
 
     if bool_present:
         print(class_label," is present")
