@@ -54,32 +54,33 @@ def relation_objects(class_label, direction, boxes, width, height):
     obj1_idx = 0
 
     x1, y1, x2, y2 = boxes[obj1_idx]
+    coordinates = [x1, y1, x2, y2]
     object1_center = ((x1 + x2) / 2, (y1 + y2) / 2)
     label_obj1 = class_label
 
     # check based on the direction
     if direction == 'left':
         if object1_center[0] < width/2:
-            return True
+            return True, coordinates
         else:
-            return False
+            return False, coordinates
     elif direction == 'right':
         if object1_center[0] > width/2:
-            return True
+            return True, coordinates
         else:
-            return False
+            return False, coordinates
     elif direction == 'top':
         if object1_center[1] < height/2:
-            return True
+            return True, coordinates
         else:
-            return False
+            return False, coordinates
     elif direction == 'bottom':
         if object1_center[1] > height/2:
-            return True
+            return True, coordinates
         else:
-            return False
+            return False, coordinates
     else:
-        return False
+        return False, coordinates
 
 
 ############################################################

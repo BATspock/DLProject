@@ -36,7 +36,7 @@ def extract_object_moved(text):
 
 if __name__ == "__main__":
     # Example usage
-    text = "Move the orange to the right."
+    text = "Move the orange to the top."
     object_moved, direction = extract_object_moved(text)
     print(object_moved) # Output: orange
     print(direction) # Output: right
