@@ -3,10 +3,8 @@ import time
 import sys
 import numpy as np
 from PIL import Image
-import cv2
 import itertools
 
-text_prompt = "dog cat"
 
 def detect_object(class_label, outputs, width, height, classes):
     
