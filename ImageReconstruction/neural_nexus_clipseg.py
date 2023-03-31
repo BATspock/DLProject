@@ -17,7 +17,7 @@ from typing import Tuple
 
 class getMask(object):
 
-    def __init__(self, classes_file, image_str:str, direction_list: list, exceptions: list):
+    def __init__(self, classes_list:list, image_str:str, direction_list: list, exceptions: list):
         
         assert(str == type(image_str))
 
@@ -28,8 +28,7 @@ class getMask(object):
         self._prompt = image_str.split('_')[0]
         self._coco_class_list = None
 
-        with open(classes_file, 'r') as f:
-            self._coco_class_list = f.read().splitlines()
+        self._coco_class_list = classes_list
         #initliazing segmenter
         self._processor = CLIPSegProcessor.from_pretrained("CIDAS/clipseg-rd64-refined")
         self._model = CLIPSegForImageSegmentation.from_pretrained("CIDAS/clipseg-rd64-refined")
@@ -114,6 +113,15 @@ class getMask(object):
     
 if __name__ == "__main__":
     # set the path to the classes file
-    maskObj = getMask('../YOLO/classes.txt', 'a tvmonitor to the right of a teddy bear_2.jpeg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
+    class_list= ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', \
+                 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', \
+                'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', \
+                    'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', \
+                        'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',\
+                              'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'sofa',\
+                                  'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', \
+                                    'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', \
+                                        'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+    maskObj = getMask(class_list, 'a tvmonitor to the right of a teddy bear_2.jpeg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
     mask = maskObj.get_clip_mask()
     cv2.imwrite('newmasktest.png', mask)
