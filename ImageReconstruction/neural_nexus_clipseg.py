@@ -14,90 +14,106 @@ import clip
 import cv2
 from typing import Tuple
 
-#Function to extract objects and direction from sentence
-def extract_object_and_direction(sentence: str, class_list: list, direction_list: list, exceptions: list)-> Tuple[list, str]:
-    #Extract words and bigrams from sentence that are present in class list
-    object_list = []
-    nlp = spacy.load("en_core_web_sm")
 
-    #Check if any exceptions are present in sentence and if present remove the space between them
-    for exception in exceptions:
-        if exception in sentence:
-            sentence = sentence.replace(exception, exception.replace(" ", ""))
+class getMask(object):
 
-    doc = nlp(sentence)
-    for i, token in enumerate(doc):
-        if token.text in class_list:
-            object_list.append(token.text)
-        elif token.i == len(doc) - 1:
-            break
-        elif token.text + " " + token.nbor(1).text in class_list:
-            object_list.append(token.text + " " + token.nbor(1).text)
+    def __init__(self, classes_file, image_str:str, direction_list: list, exceptions: list):
+        
+        assert(str == type(image_str))
 
-    #If bigram is present in class list, remove all elements after second element
-    if len(object_list)>2:
-        for i, object in enumerate(object_list):
-            if " " in object:
-                object_list = object_list[:2]
+        self._image = Image.open(image_str)
+        self._direction_list = direction_list
+        self._exceptions = exceptions
+        # remove _ and numbers from image_str
+        self._prompt = image_str.split('_')[0]
+        self._coco_class_list = None
+
+        with open(classes_file, 'r') as f:
+            self._coco_class_list = f.read().splitlines()
+        #initliazing segmenter
+        self._processor = CLIPSegProcessor.from_pretrained("CIDAS/clipseg-rd64-refined")
+        self._model = CLIPSegForImageSegmentation.from_pretrained("CIDAS/clipseg-rd64-refined")
+
+    def get_smaller_mask(self, mask1, mask2):
+        
+        mask1 = np.squeeze(mask1).astype(np.uint8)
+        mask2 = np.squeeze(mask2).astype(np.uint8)
+        mask1 = Image.fromarray(mask1)
+        mask2 = Image.fromarray(mask2)
+        
+        mask1 = np.array(mask1)
+        mask2 = np.array(mask2)
+        # threshold mask to form binary image
+
+        mask1 = cv2.resize(mask1, (self._image.size[0], self._image.size[1]))
+        mask2 = cv2.resize(mask2, (self._image.size[0], self._image.size[1]))
+
+        ret, mask1 = cv2.threshold(mask1, 127, 255, cv2.THRESH_BINARY)
+        ret, mask2 = cv2.threshold(mask2, 127, 255, cv2.THRESH_BINARY)
+        # return mask with lesser number of zero pixels
+
+        if np.count_nonzero(mask1) > np.count_nonzero(mask2):
+            return mask1
+        else:
+            return mask2
+
+    #Function to extract objects and direction from sentence
+    def extract_object_and_direction(self)-> Tuple[list, str]:
+        #Extract words and bigrams from sentence that are present in class list
+        object_list = []
+        nlp = spacy.load("en_core_web_sm")
+
+        #Check if any exceptions are present in sentence and if present remove the space between them
+        for exception in self._exceptions:
+            if exception in self._prompt:
+                self._prompt = self._prompt.replace(exception, exception.replace(" ", ""))
+
+        doc = nlp(self._prompt)
+        #print(doc)
+        for i, token in enumerate(doc):
+            if token.text in self._coco_class_list:
+                object_list.append(token.text)
+            elif token.i == len(doc) - 1:
                 break
+            elif token.text + " " + token.nbor(1).text in self._coco_class_list:
+                object_list.append(token.text + " " + token.nbor(1).text)
+
+        #If bigram is present in class list, remove all elements after second element
+        if len(object_list)>2:
+            for i, object in enumerate(object_list):
+                if " " in object:
+                    object_list = object_list[:2]
+                    break
+        
+        #Extract direction from sentence that is present in direction list
+        direction = ""
+        for token in doc:
+            if token.text in self._direction_list:
+                direction = token.text
+                break
+        
+        return object_list, direction
     
-    #Extract direction from sentence that is present in direction list
-    direction = ""
-    for token in doc:
-        if token.text in direction_list:
-            direction = token.text
-            break
+    def get_clip_mask(self)->np.ndarray:
+        
+        objects, _ = self.extract_object_and_direction()
+        print(objects)
+        inputs = self._processor(text=objects, images=[self._image] * len(objects), padding="max_length", return_tensors="pt")
+        with torch.no_grad():
+            outputs = self._model(**inputs)
+        preds = outputs.logits.unsqueeze(1)
+        # get only the first object
+        mask_np_1 = preds[0].numpy()
+        mask_np_2 = preds[1].numpy()
     
-    return object_list, direction
-
-#Initiating CLIPseg model from hugging face
-processor = CLIPSegProcessor.from_pretrained("CIDAS/clipseg-rd64-refined")
-model = CLIPSegForImageSegmentation.from_pretrained("CIDAS/clipseg-rd64-refined")
-
-#Read coco class list
-with open('/content/coco_class_list.txt', 'r') as f:
-    coco_class_list = f.read().splitlines()
-
-#Read base image here
-image = Image.open("{Image path here}")
-
-#Get image prompt by taking the name of the file and removing numbers
-image_prompt = ""
-
-#Need to get all objects from prompt text present in coco list
-objects, direction = extract_object_and_direction(image_prompt, coco_class_list, ["above", "below", "left", "right"], ["dining table", "tv monitor", "potted plant]"])
-
-#Get all objects in image
-inputs = processor(text=objects, images=[image] * len(objects), padding="max_length", return_tensors="pt")
-
-#Mask Prediction
-with torch.no_grad():
-  outputs = model(**inputs)
-preds = outputs.logits.unsqueeze(1)
-
-#Visualising the image and the object segmenetation masks
-# _, ax = plt.subplots(1, len(objects) + 1, figsize=(3*(len(objects) + 1), 2))
-# [a.axis('off') for a in ax.flatten()]
-# ax[0].imshow(image)
-# [ax[i+1].imshow(torch.sigmoid(preds[i][0])) for i in range(len(objects))];
-# [ax[i+1].text(0, -15, prompt) for i, prompt in enumerate(objects)];
-
-#Iterate through mask predictions and convert them into numpy arrays and store masks as image files
-for i in range(len(preds)):
-  mask_np = preds[i].numpy()
-  
-  # stack all four arrays along the depth dimension to get a 4-channel image
-  #mask_array = np.stack([mask1_np, mask2_np, mask3_np, mask4_np], axis=-1)
-
-  # Convert the tensor to a numpy array with the data type `uint8`
-  seg_array = np.squeeze(mask_np).astype(np.uint8)
-
-  # Create a PIL Image object from the numpy array
-  seg_image = Image.fromarray(seg_array)
-
-  rgb_img = seg_image.convert('RGB')
-
-  # Save the image as a JPEG file
-  rgb_img.save(f'{objects[i]} mask.jpg')
-
-#Read Mask and perform downstream tasks
+        mask_np = self.get_smaller_mask(mask_np_1, mask_np_2)
+        # Convert the tensor to a numpy array with the data type `uint8`
+        seg_array = np.squeeze(mask_np).astype(np.uint8)
+        
+        return seg_array
+    
+if __name__ == "__main__":
+    # set the path to the classes file
+    maskObj = getMask('../YOLO/classes.txt', 'a tvmonitor to the right of a teddy bear_2.jpeg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
+    mask = maskObj.get_clip_mask()
+    cv2.imwrite('newmasktest.png', mask)
