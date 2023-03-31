@@ -1,5 +1,7 @@
 YOLO/yolov3.weights
-images_final_2_objects
+dalle_imgs_2objects
 dl_venv
 .ipynb_checkpoints
 dalle_api_images
+pix2pix_imgs
+pix2pix_imgs_2objects

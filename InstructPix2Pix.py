@@ -15,35 +15,27 @@ import transformers
 # from google.colab import files
 from diffusers import StableDiffusionInstructPix2PixPipeline
 
+
 # %%
 model_id = "timbrooks/instruct-pix2pix"
-pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
-
-# %%
-url = "https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/mountain.png"
+pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("mps")
 
 
-def download_image(url):
-    image = PIL.Image.open(requests.get(url, stream=True).raw)
-    image = PIL.ImageOps.exif_transpose(image)
-    image = image.convert("RGB")
-    return image
+# for all prompts in prompt_list.txt file generate images
+with open("prompt_list.txt", "r") as f:
+    prompts = f.readlines()
+    # remove new line character
+    prompts = [prompt.strip() for prompt in prompts]
 
 
-image = download_image(url)
 
-prompt = "make the mountains snowy"
-images = pipe(prompt, image=image, num_inference_steps=20, image_guidance_scale=1.5, guidance_scale=7).images
-images[0].save("snowy_mountains.png")
+for prompt in prompts:
+    print("#"*50)
+    print("Promt:", prompt)
 
-# %%
-img = PIL.Image.open("Wiki_training_0226.jpg")
-image = PIL.ImageOps.exif_transpose(img)
-image = image.convert("RGB")   
-
-# %%
-prompt = "make it rainy"
-images = pipe(prompt, image=image, num_inference_steps=20, image_guidance_scale=1.5, guidance_scale=7).images
-images[0].save("rainy_hollywood.png")
-
-
+    for i in range(4):
+        cur_dalle_img = PIL.Image.open('dalle_api_images/' + prompt + "_" + str(i) + ".jpg")
+        for j in range(4):
+            cur_img = pipe(prompt, image=cur_dalle_img, num_inference_steps=20, image_guidance_scale=1.5, guidance_scale=7).images[0]
+            cur_img.save(f"pix2pix_imgs/{prompt}_{i}_{j}.jpg")
+    print("#"*50)
