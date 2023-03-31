@@ -128,6 +128,12 @@ class Visor:
 
 
 if __name__ == "__main__":
+    """
+    # This name is for the folder containing the images from dalle. Keep the folder name as it is if using dalle
+    input_folder = 'dalle_imgs_2objects' 
+    # initial installation: python -m spacy download en_core_web_sm
+    # spacy: version 3.5.1
+    """
     input_folder = 'dalle_imgs_2objects'
     visor = Visor(input_folder=input_folder)
     visor.run_visor_pipeline()
