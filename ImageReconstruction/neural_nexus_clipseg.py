@@ -131,7 +131,7 @@ if __name__ == "__main__":
                                     'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', \
                                         'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
     
-    maskObj = getMask(class_list, 'a toilet below an umbrella_2.jpg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
+    maskObj = getMask(class_list, 'a cup above a kite_1.jpg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
     mask = maskObj.get_clip_mask()
     cv2.imwrite('newmasktest.png', mask)
     

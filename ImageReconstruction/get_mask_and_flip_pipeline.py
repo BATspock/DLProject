@@ -1,6 +1,7 @@
-import cv2
-import os
+from get_flipped_object import MoveObject
 from neural_nexus_clipseg import getMask
+import os
+import cv2
 
 class_list= ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', \
                  'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', \
@@ -17,6 +18,22 @@ os.chdir('../SegmentationImagesReconstruction')
 for imgs in os.listdir():
     print(imgs)
     img = cv2.imread(imgs)
-    maskObj = getMask(class_list, imgs, ['left', 'right', 'above', 'below'], ["dining table", "tv monitor", "potted plant"])
+    maskObj = getMask(class_list, imgs, ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
+
     mask = maskObj.get_clip_mask()
-    cv2.imwrite('mask_' + imgs+'.png', mask)
+
+    direction = None
+
+    if 'left' in imgs:
+        direction = 'left'
+    elif 'right' in imgs:
+        direction = 'right'
+    elif 'above' in imgs:
+        direction = 'above'
+    else:
+        direction = 'below'
+
+    flip_obj = MoveObject(img, mask, direction=direction)
+    translated_img = flip_obj.translate_object()
+
+    cv2.imwrite('translated_' + imgs, translated_img)

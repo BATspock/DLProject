@@ -137,7 +137,7 @@ class MoveObject(object):
         if self._direction == 'left' or self._direction == 'right':
             return self.get_shifted_image_left_right()
         
-        elif self._direction == 'top' or self._direction == 'bottom':
+        elif self._direction == 'above' or self._direction == 'below':
             return self.get_shifted_image_up_down()
         else:
             raise ValueError('Direction must be left, right, up or down')
