@@ -33,16 +33,23 @@ class getMask(object):
         self._processor = CLIPSegProcessor.from_pretrained("CIDAS/clipseg-rd64-refined")
         self._model = CLIPSegForImageSegmentation.from_pretrained("CIDAS/clipseg-rd64-refined")
 
-    def get_smaller_mask(self, mask1, mask2):
+    def get_smaller_mask(self, mask1, mask2):   
+
+        # print(mask1.shape, mask2.shape)
         
         mask1 = np.squeeze(mask1).astype(np.uint8)
         mask2 = np.squeeze(mask2).astype(np.uint8)
+        # print(np.unique(mask1), np.unique(mask2))
         mask1 = Image.fromarray(mask1)
         mask2 = Image.fromarray(mask2)
         
+        # print(type(mask1), type(mask2))
+
         mask1 = np.array(mask1)
         mask2 = np.array(mask2)
         # threshold mask to form binary image
+
+        # print(np.unique(mask1), np.unique(mask2))
 
         mask1 = cv2.resize(mask1, (self._image.size[0], self._image.size[1]))
         mask2 = cv2.resize(mask2, (self._image.size[0], self._image.size[1]))
@@ -96,7 +103,7 @@ class getMask(object):
     def get_clip_mask(self)->np.ndarray:
         
         objects, _ = self.extract_object_and_direction()
-        print(objects)
+        # print(objects)
         inputs = self._processor(text=objects, images=[self._image] * len(objects), padding="max_length", return_tensors="pt")
         with torch.no_grad():
             outputs = self._model(**inputs)
@@ -111,6 +118,7 @@ class getMask(object):
         
         return seg_array
     
+
 if __name__ == "__main__":
     # set the path to the classes file
     class_list= ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', \
@@ -122,6 +130,8 @@ if __name__ == "__main__":
                                   'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', \
                                     'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', \
                                         'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
-    maskObj = getMask(class_list, 'a tvmonitor to the right of a teddy bear_2.jpeg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
+    
+    maskObj = getMask(class_list, 'a toilet below an umbrella_2.jpg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
     mask = maskObj.get_clip_mask()
     cv2.imwrite('newmasktest.png', mask)
+    
