@@ -69,7 +69,7 @@ class Visor:
     def preprocess_prompt_folder(self, image_file)->str:
         assert(type(image_file) == str)
         prompt_text = image_file.split('.')[0]
-        if self._input_folder == 'dalle_imgs_2objects':
+        if self._input_folder == 'dalle_imgs_2objects' or self._input_folder == 'dalle_api_images':
             prompt_text = prompt_text[:-2]
         else:
             prompt_text = prompt_text[:-4]
