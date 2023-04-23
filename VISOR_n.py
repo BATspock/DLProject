@@ -123,52 +123,67 @@ class VISOR_n(object):
         # check if directions are valid
         self._get_objMask_coordinates()
         correct_directions = 0
+        #Assumption for N objects we will have N-1 directions
+        j=0
+        for i in range(len(self._directions)):
+            # if we check for i th index in diretion list check objects for i and i+1 in object list
+            # get coordinates of i and i+1 object
+            if  self._directions[i] == "left":
+                cx_1, cy_1 = self._maskCoord[self._objects[j]]
+                cx_2, cy_2 = self._maskCoord[self._objects[j+1]]
 
-        if ["between", "inbetween"] in self._directions:
-            pass
-        else:
+                if cx_1 < cx_2:
+                    correct_directions += 1
+                j+=1
+
+            elif self._directions[i] == "right":
+                cx_1, cy_1 = self._maskCoord[self._objects[j]]
+                cx_2, cy_2 = self._maskCoord[self._objects[j+1]]
+
+                if cx_1 > cx_2:
+                    correct_directions += 1
+                j+=1
+
+            elif self._directions[i] == "above" or self._directions[i] == "on top of" or self._directions[i] == "over":
+
+                cx_1, cy_1 = self._maskCoord[self._objects[j]]
+                cx_2, cy_2 = self._maskCoord[self._objects[j+1]]
+
+                if cy_1 < cy_2:
+                    correct_directions += 1
+                j+=1
+
+            elif self._directions[i] == "below" or self._directions[i] == "underneath" or self._directions[i] == "under":
+                    
+                cx_1, cy_1 = self._maskCoord[self._objects[j]]
+                cx_2, cy_2 = self._maskCoord[self._objects[j+1]]
+
+                if cy_1 > cy_2:
+                    correct_directions += 1
+                j+=1
             
-            #Assumption for N objects we will have N-1 directions
-            for i in range(len(self._directions)):
-                # if we check for i th index in diretion list check objects for i and i+1 in object list
-                # get coordinates of i and i+1 object
-                if  self._directions[i] == "left":
-                    cx_1, cy_1 = self._maskCoord[self._objects[i]]
-                    cx_2, cy_2 = self._maskCoord[self._objects[i+1]]
+            elif self._directions[i] == "between" or self._directions[i] == "inbetween":
+                # check if the objects are in the same row or column
+                main_objx, main_objy = self._maskCoord[self._objects[j]]
+                cx_2, cy_2 = self._maskCoord[self._objects[j+1]]
+                cx_3, cy_3 = self._maskCoord[self._objects[j+2]]
 
-                    if cx_1 < cx_2:
-                        correct_directions += 1
+                #horizontal check
+                if (cx_2< main_objx and cx_3>main_objx) or (cx_2>main_objx and cx_3<main_objx):
+                    correct_directions += 1
 
-                elif self._directions[i] == "right":
-                    cx_1, cy_1 = self._maskCoord[self._objects[i]]
-                    cx_2, cy_2 = self._maskCoord[self._objects[i+1]]
+                # elif (cy_2< main_objy and cy_3>main_objy) or (cy_2>main_objy and cy_3<main_objy):
+                #     correct_directions += 1
 
-                    if cx_1 > cx_2:
-                        correct_directions += 1
-
-                elif self._directions[i] == "above" or self._directions[i] == "on top of" or self._directions[i] == "over":
-
-                    cx_1, cy_1 = self._maskCoord[self._objects[i]]
-                    cx_2, cy_2 = self._maskCoord[self._objects[i+1]]
-
-                    if cy_1 < cy_2:
-                        correct_directions += 1
-
-                elif self._directions[i] == "below" or self._directions[i] == "underneath" or self._directions[i] == "under":
-                        
-                        cx_1, cy_1 = self._maskCoord[self._objects[i]]
-                        cx_2, cy_2 = self._maskCoord[self._objects[i+1]]
-    
-                        if cy_1 > cy_2:
-                            correct_directions += 1
+                j+=2
 
         return correct_directions/len(self._directions)
 
 if __name__ == "__main__":
 
-    obj = ["lamp","book","bird"]
+    obj = ["lamp","book","bird", "lamp", "bird"]
     img_str = "test2 lamp on the right of a book to the left of a bird.png"
-    dire = ["right", "left"]
+    dire = ["right", "between", "left"]
     visorn = VISOR_n(img=img_str, objects=obj , directions=dire) 
     coordinates = visorn._get_objMask_coordinates()
     # plot coordinates on an image
