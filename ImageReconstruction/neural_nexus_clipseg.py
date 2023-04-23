@@ -134,4 +134,5 @@ if __name__ == "__main__":
     maskObj = getMask(class_list, 'a cup above a kite_1.jpg', ['left', 'right', 'up', 'down'], ["dining table", "tv monitor", "potted plant"])
     mask = maskObj.get_clip_mask()
     cv2.imwrite('newmasktest.png', mask)
+    print("Mask saved")
     
