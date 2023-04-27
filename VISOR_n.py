@@ -228,7 +228,7 @@ if __name__ == "__main__":
         # cv2.destroyAllWindows()
 
         sum_value += visorn._check_directions()
-        # print(visorn._check_directions())
+        
     
     visor_value = sum_value/len(image_list)
     print("Visor value: ", visor_value)
