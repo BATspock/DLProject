@@ -181,9 +181,9 @@ class VISOR_n(object):
 
 if __name__ == "__main__":
 
-    obj = ["lamp","book","bird", "lamp", "bird"]
-    img_str = "test2 lamp on the right of a book to the left of a bird.png"
-    dire = ["right", "between", "left"]
+    obj = ['pottedplant', 'clock']
+    img_str = "a pottedplant to the right of the clock_0.jpg"
+    dire = ['right']
     visorn = VISOR_n(img=img_str, objects=obj , directions=dire) 
     coordinates = visorn._get_objMask_coordinates()
     # plot coordinates on an image
@@ -205,6 +205,6 @@ if __name__ == "__main__":
     #     cv2.imshow("image", masks[obj])
     #     cv2.waitKey(0)
     #     cv2.destroyAllWindows()
-
+    
     print(visorn._check_directions())
     
