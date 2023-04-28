@@ -39,6 +39,12 @@ import cv2
 import torch
 from transformers import CLIPSegProcessor, CLIPSegForImageSegmentation
 from PIL import Image
+import sys
+import os
+
+sys.path.append('/Users/nimishamittal/Documents/USC/CSCI566_DL/DLProject')
+import Visor
+import Visor.Visor_NER_Data_Preparation as visor
 
 
 class VISOR_n(object):
@@ -179,21 +185,67 @@ class VISOR_n(object):
 
         return correct_directions/len(self._directions)
 
+
+def extract_objects(img_str):
+    prompt = img_str.split(".")[0][:-2]
+    print(prompt)
+    _, objects, directions = visor.annotate_prompts([prompt])
+    print(objects)
+    print(directions)
+    print("#"*50)
+    return objects, directions
+
 if __name__ == "__main__":
 
-    obj = ['pottedplant', 'clock']
-    img_str = "a pottedplant to the right of the clock_0.jpg"
-    dire = ['right']
-    visorn = VISOR_n(img=img_str, objects=obj , directions=dire) 
-    coordinates = visorn._get_objMask_coordinates()
-    # plot coordinates on an image
-    dummy_img = cv2.imread(img_str)
-    dummy_img = cv2.resize(dummy_img, (352, 352))
-    for obj in obj:
-        cv2.circle(dummy_img, coordinates[obj], 5, (0, 0, 255), -1)
-    cv2.imshow("image", dummy_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # obj = ["lamp","book","bird", "lamp", "bird"]
+    # dire = ["right", "between", "left"]
+    # img_str = "test2 lamp on the right of a book to the left of a bird.png"
+
+    image_directory = 'Dalle_object_images/dalle_api_images_2_objects'
+    image_list = os.listdir(image_directory)
+
+    # only keep images with extension .png
+    image_list = [img_str for img_str in image_list if img_str.endswith(".png") or img_str.endswith(".jpg") or img_str.endswith(".jpeg")]
+
+    sum_value = 0
+
+    for img_str in image_list:
+        obj, dir = extract_objects(img_str)
+
+        # concatenate image directory and image name
+        img_name = os.path.join(image_directory, img_str)
+        visorn = VISOR_n(img=img_name, objects=obj , directions=dir) 
+        coordinates = visorn._get_objMask_coordinates()
+
+        # plot coordinates on an image
+        dummy_img = cv2.imread(img_name)
+        dummy_img = cv2.resize(dummy_img, (352, 352))
+
+        for obj in obj:
+            cv2.circle(dummy_img, coordinates[obj], 5, (0, 0, 255), -1)
+        # cv2.imshow("image", dummy_img)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+
+        sum_value += visorn._check_directions()
+        
+    
+    visor_value = sum_value/len(image_list)
+    print("Visor value: ", visor_value)
+    
+    # visorn = VISOR_n(img=img_str, objects=obj , directions=dire) 
+    # coordinates = visorn._get_objMask_coordinates()
+    # # plot coordinates on an image
+    # dummy_img = cv2.imread(img_str)
+    # dummy_img = cv2.resize(dummy_img, (352, 352))
+    # for obj in obj:
+    #     cv2.circle(dummy_img, coordinates[obj], 5, (0, 0, 255), -1)
+    # cv2.imshow("image", dummy_img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
+    # print(visorn._check_directions())
+    
     
     # masks = visorn._get_object_mask()
     # for obj in obj:
@@ -205,6 +257,6 @@ if __name__ == "__main__":
     #     cv2.imshow("image", masks[obj])
     #     cv2.waitKey(0)
     #     cv2.destroyAllWindows()
-    
-    print(visorn._check_directions())
+
+    # print(visorn._check_directions())
     

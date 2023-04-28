@@ -1,0 +1,28 @@
+a bottle to the right of a laptop to the right of a cup
+an umbrella to the right of a car to the right of a teddy bear
+a horse to the right of a snowboard to the right of a sports ball
+a chair to the right of a couch to the right of a tvmonitor
+a bird to the right of a cat to the right of a frisbee
+a clock to the right of a book to the left of an umbrella
+a bird to the right of a cat to the left of a frisbee
+a suitcase to the right of a bottle to the left of a tie
+a wine glass to the right of a bottle to the left of a cup
+a hangbag to the left of a parking meter to the right of a snowboard
+a cup to the left of a bottle to the right of a suitcase
+a clock to the left of a book to the right of an umbrella
+a bird to the left of a cat to the right of a banana
+a traffic light to the left of a bed to the left of a baseball bat
+a broccoli to the left of a sandwich to the left of a pizza
+a carrot to the left of a sandwich to the left of a banana
+a donut to the left of a cake to the left of a bottle
+a broccoli between a pizza and a carrot
+a fork between a sandwich and a bottle
+a backpack between a chair and a suitcase
+a vase between a book and a clock
+a carrot above the knife to the right of the sheep
+a cat between the stop sign to the left of the microwave
+a suitcase to the left of the remote below the hot dog
+an orange to the left of the sofa above the microwave
+
+
+
